@@ -1,0 +1,12 @@
+Problem 2:
+
+
+Here's what the code is trying to do in simpler terms:
+Imagine you have a list of tasks that you want to do, and you want to get them done quickly. This code creates a way to do those tasks simultaneously.
+* 		It sets up a system for handling these tasks using something called a "channel," which is like a conveyor belt for tasks. The channel can hold up to 10 tasks at a time.
+* 		It hires four workers (we call them goroutines) to help with the tasks. Each worker sits by the conveyor belt (the channel) and takes tasks as they come.
+* 		The main boss (the main function) decides to send a particular task to the conveyor belt. In this case, the task is to print the word "HERE1."
+* 		As soon as the boss sends the task, it doesn't wait around. It goes ahead and says "Hello" (prints "Hello").
+* 		Meanwhile, the worker goroutines are always ready. When they see a task on the conveyor belt, they grab it and do it. In this case, they see the task "HERE1" and print it.
+In simpler terms, this code helps you get things done faster by getting a group of workers (goroutines) to work on tasks at the same time. It uses a conveyor belt (channel) to pass the tasks to the workers. It's like a team effort to be more efficient.
+This pattern can be used in various situations where you have lots of tasks, and you want to get them done quickly and efficiently. For example, think of a kitchen with multiple chefs cooking different dishes at the same time, or a factory with workers assembling products on an assembly line. It's all about teamwork and efficiency!
