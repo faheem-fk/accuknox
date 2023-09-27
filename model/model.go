@@ -22,5 +22,5 @@ type User struct {
 type UserSession struct {
 	gorm.Model
 	UserID uint   `json:"user_id"`
-	SID    string `json:"sid" gorm:"column:sid"`
+	SID    string `json:"sid" redis:"column:sid"`
 }

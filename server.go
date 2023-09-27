@@ -19,6 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-redis/redis"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -27,13 +28,13 @@ func main() {
 
 	// Initialize Gin router
 	router := gin.Default()
-
 	// Database configuration
-	dbHost := "localhost"
+	dbHost := os.Getenv("POSTGRES_HOST")
 	dbPort := "5432"
-	dbName := "accuknox"
-	dbUser := "faheem"
-	dbPassword := "secret"
+	dbName := os.Getenv("POSTGRES_DB")
+	dbUser := os.Getenv("POSTGRES_USER")
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	redisHost := os.Getenv("REDIS_HOST")
 
 	// Construct the database connection string
 	dbConnectionString := fmt.Sprintf(
@@ -49,8 +50,19 @@ func main() {
 
 	db.AutoMigrate(&model.Note{}, &model.User{}, &model.UserSession{})
 
+	rClient := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%v:6379", redisHost),
+		DB:   0,
+	})
+
+	_, err = rClient.Ping().Result()
+	if err != nil {
+		log.Println(err)
+		panic("Failed to connect to redis")
+	}
+
 	// Initialize repository implementations
-	userRepo := repository.NewUserRepository(db)
+	userRepo := repository.NewUserRepository(db, rClient)
 	noteRepo := repository.NewNoteRepository(db)
 
 	// Initialize service implementations with repositories
@@ -125,14 +137,12 @@ func authorizeMiddleware(sessionService service.SessionService) gin.HandlerFunc 
 		// Inside your handler where you need to extract the SID
 		var request dto.AuthRequest
 
-		// Read ones
 		if err := c.ShouldBindBodyWith(&request, binding.JSON); err != nil {
 			log.Println("[authorizeMiddleware] ", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
 			return
 		}
 
-		// Now, you can access the SID as request.SID
 		sid := request.SID
 
 		// Check if the session is valid using the SessionService
